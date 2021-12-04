@@ -39,7 +39,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     name: Versionning and Publish
-    needs: [example-tests, test]
+    needs: [test]
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
