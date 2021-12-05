@@ -5,17 +5,15 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { EthppProvider } from "ethpp";
 
-// MetaMask is automatically injected
-const providerConnectors = defineProviders();
-
-// Equivalent to
+// MetaMask is injected in the default connectors
+// Alternatively, one case explicitly define the providers and use the object as props of the provider
 // const providerConnectors = defineProviders({
 //   MetaMask: new MetaMaskConnector()
 // });
 
 ReactDOM.render(
   <React.StrictMode>
-    <EthppProvider connectors={providerConnectors}>
+    <EthppProvider>
       <App />
     </EthppProvider>
   </React.StrictMode>,
