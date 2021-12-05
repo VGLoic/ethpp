@@ -8,6 +8,7 @@ import {
   synchronize,
 } from "./helpers";
 import { DEFAULT_CONNECTORS } from ".";
+import { useSafeDispatch } from "./helpers/use-safe-dispatch";
 
 export type IEthppContext = State & {
   connectProvider: (providerKey: ProviderKey) => Promise<void>;
@@ -30,7 +31,10 @@ export function EthppProvider({
   ...otherProps
 }: EthppProps) {
   const providerConnectorsRef = React.useRef(providerConnectors);
-  const [state, dispatch] = React.useReducer(reducer, initialState);
+
+  const [state, unsafeDispatch] = React.useReducer(reducer, initialState);
+  const dispatch = useSafeDispatch(unsafeDispatch);
+
   const [isReady, setIsReady] = React.useState(false);
 
   const { selectedProvider, connectedKeys } = state;
@@ -47,7 +51,7 @@ export function EthppProvider({
     const unsubscribe = subscribe();
 
     return unsubscribe;
-  }, [connectedKeys]);
+  }, [connectedKeys, dispatch]);
 
   const disconnectProvider = React.useCallback(
     async (providerKey: ProviderKey) => {
@@ -63,7 +67,7 @@ export function EthppProvider({
         providerKey,
       });
     },
-    [connectedKeys]
+    [connectedKeys, dispatch]
   );
 
   const connectProvider = React.useCallback(
@@ -82,22 +86,25 @@ export function EthppProvider({
         throw new Error("Error while connecting :(");
       }
     },
-    []
+    [dispatch]
   );
 
-  const selectProvider = React.useCallback((providerKey: ProviderKey) => {
-    if (!(providerKey in providerConnectorsRef.current)) {
-      throw new Error("Connector not existing :(");
-    }
-    dispatch({ type: "selectedProviderChanged", payload: { providerKey } });
-  }, []);
+  const selectProvider = React.useCallback(
+    (providerKey: ProviderKey) => {
+      if (!(providerKey in providerConnectorsRef.current)) {
+        throw new Error("Connector not existing :(");
+      }
+      dispatch({ type: "selectedProviderChanged", payload: { providerKey } });
+    },
+    [dispatch]
+  );
 
   React.useEffect(() => {
     synchronize({
       dispatch,
       providerConnectors: providerConnectorsRef.current,
     }).finally(() => setIsReady(true));
-  }, []);
+  }, [dispatch]);
 
   const value: IEthppContext = {
     ...state,
