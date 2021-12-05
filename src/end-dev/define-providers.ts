@@ -1,10 +1,8 @@
 import { ProviderConnectors } from "..";
-import { DEFAULT_CONNECTORS } from "./default-connectors";
 
 export function defineProviders<
   DefinedProviderConnectors extends ProviderConnectors
->(providerConnectors?: DefinedProviderConnectors) {
-  if (!providerConnectors) return DEFAULT_CONNECTORS;
+>(providerConnectors: DefinedProviderConnectors) {
   Object.values(providerConnectors).reduce((acc, connector) => {
     if (acc[connector.id]) {
       throw new Error(

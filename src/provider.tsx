@@ -7,6 +7,7 @@ import {
   subscribeToAccountAndChainChanged,
   synchronize,
 } from "./helpers";
+import { DEFAULT_CONNECTORS } from ".";
 
 export type IEthppContext = State & {
   connectProvider: (providerKey: ProviderKey) => Promise<void>;
@@ -21,11 +22,11 @@ export const EthppContext = React.createContext<IEthppContext | undefined>(
 );
 
 type EthppProps = {
-  providerConnectors: ProviderConnectors;
+  providerConnectors?: ProviderConnectors;
 };
 
 export function EthppProvider<Props extends EthppProps>({
-  providerConnectors,
+  providerConnectors = DEFAULT_CONNECTORS,
   ...otherProps
 }: Props) {
   const providerConnectorsRef = React.useRef(providerConnectors);
