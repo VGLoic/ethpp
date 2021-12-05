@@ -16,7 +16,7 @@ function NotConnectedApp() {
 }
 
 function ConnectedApp() {
-  const { account, chainId, disconnect, provider } = useSelectedProvider();
+  const { account, chainId, disconnect, provider, key } = useSelectedProvider();
 
   const [balance, setBalance] = React.useState<number | null>(null);
 
@@ -33,6 +33,9 @@ function ConnectedApp() {
 
   return (
     <div>
+      <div>
+        <strong>Connected with: </strong> {key}
+      </div>
       <div>
         <strong>Account: </strong> {account}
       </div>
