@@ -29,10 +29,10 @@ type UseProvider =
       provider: EthProvider | WalletConnectProvider;
     });
 export function useProvider(providerKey: ProviderKey): UseProvider {
-  const { providers, connectProvider, disconnectProvider, connectors } =
+  const { providers, connectProvider, disconnectProvider, providerConnectors } =
     useEthpp();
 
-  if (!(providerKey in connectors)) {
+  if (!(providerKey in providerConnectors)) {
     throw new Error("Connector not existing :(");
   }
 
@@ -48,10 +48,10 @@ export function useProvider(providerKey: ProviderKey): UseProvider {
   const providerState = providers[providerKey];
 
   const provider = React.useMemo(() => {
-    const connector = connectors[providerKey];
+    const connector = providerConnectors[providerKey];
     if (!connector) return null;
     return connector.getProvider();
-  }, [providerKey, connectors]);
+  }, [providerKey, providerConnectors]);
 
   if (!providerState) {
     if (!provider) {
