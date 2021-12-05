@@ -1,7 +1,7 @@
-import { MetaMaskConnector, ProviderConnectors } from "..";
+import { MetaMaskConnector } from "..";
 
 const metamaskConnector = new MetaMaskConnector();
 
-export const DEFAULT_CONNECTORS: ProviderConnectors = {
+export const DEFAULT_CONNECTORS = {
   MetaMask: metamaskConnector,
 };

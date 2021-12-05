@@ -1,16 +1,18 @@
-import { ProviderConnectors, WalletConnectConnector } from "..";
-import { DEFAULT_CONNECTORS } from "./default-connectors";
+import { ProviderConnectors } from "..";
 
-type DefineProviderOpts = {
-  disableDefaults?: boolean;
-};
-export function defineProviders(
-  providerConnectors: Record<string, WalletConnectConnector>,
-  opts = {} as DefineProviderOpts
-): ProviderConnectors {
-  if (opts.disableDefaults) return providerConnectors;
-  return {
-    ...DEFAULT_CONNECTORS,
-    ...providerConnectors,
-  };
+export function defineProviders<
+  DefinedProviderConnectors extends ProviderConnectors
+>(providerConnectors: DefinedProviderConnectors) {
+  Object.values(providerConnectors).reduce((acc, connector) => {
+    if (acc[connector.id]) {
+      throw new Error(
+        "Invalid connector configuration. Would it be possible that two similar connectors have been registered?"
+      );
+    }
+    return {
+      ...acc,
+      [connector.id]: true,
+    };
+  }, {} as Record<string, boolean>);
+  return providerConnectors;
 }

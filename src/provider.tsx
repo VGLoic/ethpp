@@ -7,12 +7,13 @@ import {
   subscribeToAccountAndChainChanged,
   synchronize,
 } from "./helpers";
+import { DEFAULT_CONNECTORS } from ".";
 
 export type IEthppContext = State & {
   connectProvider: (providerKey: ProviderKey) => Promise<void>;
   disconnectProvider: (providerKey: ProviderKey) => Promise<void>;
   selectProvider: (providerKey: ProviderKey) => void;
-  connectors: ProviderConnectors;
+  providerConnectors: ProviderConnectors;
   globalStatus: "initializing" | "notConnected" | "connected";
 };
 
@@ -21,14 +22,14 @@ export const EthppContext = React.createContext<IEthppContext | undefined>(
 );
 
 type EthppProps = {
-  connectors: ProviderConnectors;
+  providerConnectors?: ProviderConnectors;
 };
 
 export function EthppProvider<Props extends EthppProps>({
-  connectors,
+  providerConnectors = DEFAULT_CONNECTORS,
   ...otherProps
 }: Props) {
-  const connectorsRef = React.useRef(connectors);
+  const providerConnectorsRef = React.useRef(providerConnectors);
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const [isReady, setIsReady] = React.useState(false);
 
@@ -38,7 +39,7 @@ export function EthppProvider<Props extends EthppProps>({
     function subscribe() {
       return subscribeToAccountAndChainChanged({
         dispatch,
-        connectors: connectorsRef.current,
+        providerConnectors: providerConnectorsRef.current,
         connectedKeys,
       });
     }
@@ -50,7 +51,7 @@ export function EthppProvider<Props extends EthppProps>({
 
   const disconnectProvider = React.useCallback(
     async (providerKey: ProviderKey) => {
-      if (!(providerKey in connectorsRef.current)) {
+      if (!(providerKey in providerConnectorsRef.current)) {
         throw new Error("Connector not existing :(");
       }
       if (!connectedKeys.includes(providerKey)) {
@@ -58,7 +59,7 @@ export function EthppProvider<Props extends EthppProps>({
       }
       await disconnectWallet({
         dispatch,
-        connectors: connectorsRef.current,
+        providerConnectors: providerConnectorsRef.current,
         providerKey,
       });
     },
@@ -67,13 +68,13 @@ export function EthppProvider<Props extends EthppProps>({
 
   const connectProvider = React.useCallback(
     async (providerKey: ProviderKey) => {
-      if (!(providerKey in connectorsRef.current)) {
+      if (!(providerKey in providerConnectorsRef.current)) {
         throw new Error("Connector not existing :(");
       }
       try {
         await connectWallet({
           dispatch,
-          connectors: connectorsRef.current,
+          providerConnectors: providerConnectorsRef.current,
           providerKey,
         });
       } catch (err) {
@@ -85,21 +86,22 @@ export function EthppProvider<Props extends EthppProps>({
   );
 
   const selectProvider = React.useCallback((providerKey: ProviderKey) => {
-    if (!(providerKey in connectorsRef.current)) {
+    if (!(providerKey in providerConnectorsRef.current)) {
       throw new Error("Connector not existing :(");
     }
     dispatch({ type: "selectedProviderChanged", payload: { providerKey } });
   }, []);
 
   React.useEffect(() => {
-    synchronize({ dispatch, connectors: connectorsRef.current }).finally(() =>
-      setIsReady(true)
-    );
+    synchronize({
+      dispatch,
+      providerConnectors: providerConnectorsRef.current,
+    }).finally(() => setIsReady(true));
   }, []);
 
   const value: IEthppContext = {
     ...state,
-    connectors: connectorsRef.current,
+    providerConnectors: providerConnectorsRef.current,
     connectProvider,
     disconnectProvider,
     selectProvider,

@@ -4,16 +4,16 @@ import { Action } from "../reducer";
 
 type SubscribeArgs = {
   dispatch: (action: Action) => void;
-  connectors: ProviderConnectors;
+  providerConnectors: ProviderConnectors;
   connectedKeys: ProviderKey[];
 };
 export function subscribeToAccountAndChainChanged({
   dispatch,
-  connectors,
+  providerConnectors,
   connectedKeys,
 }: SubscribeArgs) {
   const unsubscribes = connectedKeys.map((providerKey) => {
-    const connector = connectors[providerKey];
+    const connector = providerConnectors[providerKey];
     if (!connector) {
       throw new Error(
         "Connector not found while subscribing! Please file an issue"
@@ -46,15 +46,15 @@ export function subscribeToAccountAndChainChanged({
 
 type DisconnectWalletArgs = {
   dispatch: (action: Action) => void;
-  connectors: ProviderConnectors;
+  providerConnectors: ProviderConnectors;
   providerKey: ProviderKey;
 };
 export async function disconnectWallet({
   dispatch,
-  connectors,
+  providerConnectors,
   providerKey,
 }: DisconnectWalletArgs) {
-  const connector = connectors[providerKey];
+  const connector = providerConnectors[providerKey];
   if (!connector) {
     throw new Error(
       "Connector not found while disconnecting! Please file an issue"
@@ -67,15 +67,15 @@ export async function disconnectWallet({
 
 type ConnectWalletArgs = {
   dispatch: (action: Action) => void;
-  connectors: ProviderConnectors;
+  providerConnectors: ProviderConnectors;
   providerKey: ProviderKey;
 };
 export async function connectWallet({
   dispatch,
-  connectors,
+  providerConnectors,
   providerKey,
 }: ConnectWalletArgs) {
-  const connector = connectors[providerKey];
+  const connector = providerConnectors[providerKey];
   if (!connector) {
     throw new Error(
       "Connector not found while connecting! Please file an issue"
@@ -97,24 +97,27 @@ export async function connectWallet({
 
 type SynchronizeArgs = {
   dispatch: (action: Action) => void;
-  connectors: ProviderConnectors;
+  providerConnectors: ProviderConnectors;
 };
-export async function synchronize({ dispatch, connectors }: SynchronizeArgs) {
+export async function synchronize({
+  dispatch,
+  providerConnectors,
+}: SynchronizeArgs) {
   const rawProviderKeys = LocalStorageHelper.getKeys();
   const providerKeys: ProviderKey[] = [];
   rawProviderKeys.forEach((rawProviderKey) => {
-    if (!(rawProviderKey in connectors)) {
+    if (!(rawProviderKey in providerConnectors)) {
       LocalStorageHelper.removeKey(rawProviderKey);
       return;
     }
     providerKeys.push(rawProviderKey as ProviderKey);
   });
   providerKeys.forEach(async (providerKey) => {
-    if (!(providerKey in connectors)) {
+    if (!(providerKey in providerConnectors)) {
       LocalStorageHelper.removeKey(providerKey);
       return;
     }
-    const connector = connectors[providerKey];
+    const connector = providerConnectors[providerKey];
     try {
       const successfullConnection = await connector.synchronize();
       if (!successfullConnection) {
