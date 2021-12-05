@@ -1,16 +1,21 @@
-import * as React from 'react';
+import * as React from "react";
 import { useProvider, useSelectedProvider } from "ethpp";
 
 function ConnectedApp() {
   const { account, chainId, disconnect, provider } = useSelectedProvider();
 
+  const [balance, setBalance] = React.useState<number | null>(null);
+
   React.useEffect(() => {
     async function fetchBalance() {
-      const balance = await provider.request({ method: "eth_getBalance", params: [account]})
-      console.log('balance: ', balance);
+      const balance = await provider.request({
+        method: "eth_getBalance",
+        params: [account],
+      });
+      setBalance(Number(balance) / 10 ** 18);
     }
     fetchBalance();
-  }, [provider, account]);
+  }, [provider, account, chainId]);
 
   return (
     <div>
@@ -19,6 +24,9 @@ function ConnectedApp() {
       </div>
       <div>
         <strong>Chain ID: </strong> {chainId}
+      </div>
+      <div>
+        <strong>Balance: </strong> {balance !== null ? `${balance} ETH` : null}
       </div>
       <button onClick={disconnect}>Disconnect</button>
     </div>
