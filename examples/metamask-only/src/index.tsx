@@ -4,9 +4,14 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { EthppProvider } from "ethpp";
-import { defineProviders } from "ethpp/lib/end-dev/index";
 
-const providerConnectors = defineProviders({});
+// MetaMask is automatically injected
+const providerConnectors = defineProviders();
+
+// Equivalent to
+// const providerConnectors = defineProviders({
+//   MetaMask: new MetaMaskConnector()
+// });
 
 ReactDOM.render(
   <React.StrictMode>
