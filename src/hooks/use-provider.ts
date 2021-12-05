@@ -98,6 +98,7 @@ export function useConnectedProvider(providerKey: ProviderKey) {
     provider: providerState.provider as EthProvider | WalletConnectProvider,
     chainId: providerState.chainId,
     account: providerState.account,
+    key: providerKey,
     disconnect: providerState.disconnect,
   };
 }
