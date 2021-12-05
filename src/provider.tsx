@@ -21,14 +21,14 @@ export const EthppContext = React.createContext<IEthppContext | undefined>(
   undefined
 );
 
-type EthppProps = {
+type EthppProps = React.PropsWithChildren<{
   providerConnectors?: ProviderConnectors;
-};
+}>;
 
-export function EthppProvider<Props extends EthppProps>({
+export function EthppProvider({
   providerConnectors = DEFAULT_CONNECTORS,
   ...otherProps
-}: Props) {
+}: EthppProps) {
   const providerConnectorsRef = React.useRef(providerConnectors);
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const [isReady, setIsReady] = React.useState(false);
