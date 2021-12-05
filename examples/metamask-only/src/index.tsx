@@ -5,7 +5,7 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { EthppProvider } from "ethpp";
 
-// MetaMask is injected in the default connectors
+// MetaMask is injected in the default connectors if the props is not filled
 // Alternatively, one case explicitly define the providers and use the object as props of the provider
 // const providerConnectors = defineProviders({
 //   MetaMask: new MetaMaskConnector()

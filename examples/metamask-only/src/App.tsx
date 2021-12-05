@@ -1,7 +1,16 @@
+import * as React from 'react';
 import { useProvider, useSelectedProvider } from "ethpp";
 
 function ConnectedApp() {
-  const { account, chainId, disconnect } = useSelectedProvider();
+  const { account, chainId, disconnect, provider } = useSelectedProvider();
+
+  React.useEffect(() => {
+    async function fetchBalance() {
+      const balance = await provider.request({ method: "eth_getBalance", params: [account]})
+      console.log('balance: ', balance);
+    }
+    fetchBalance();
+  }, [provider, account]);
 
   return (
     <div>
