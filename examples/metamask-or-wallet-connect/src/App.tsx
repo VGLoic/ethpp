@@ -1,5 +1,19 @@
 import * as React from "react";
-import { useProvider, useSelectedProvider, useEthpp } from "ethpp";
+import { useEthpp, useSelectedProvider } from "ethpp";
+
+function NotConnectedApp() {
+  const { connectProvider } = useEthpp();
+
+  return (
+    <div>
+      <div>Connect with:</div>
+      <button onClick={() => connectProvider("MetaMask")}>MetaMask</button>
+      <button onClick={() => connectProvider("WalletConnect")}>
+        Wallet Connect
+      </button>
+    </div>
+  );
+}
 
 function ConnectedApp() {
   const { account, chainId, disconnect, provider } = useSelectedProvider();
@@ -35,14 +49,10 @@ function ConnectedApp() {
 
 function App() {
   const { globalStatus } = useEthpp();
-  const { status, connect } = useProvider("MetaMask");
 
   if (globalStatus === "initializing") return null;
 
-  if (status === "unavailable") return <div>MetaMask not available</div>;
-
-  if (status === "notConnected")
-    return <button onClick={connect}>Connect with MetaMask</button>;
+  if (globalStatus === "notConnected") return <NotConnectedApp />;
 
   return <ConnectedApp />;
 }
