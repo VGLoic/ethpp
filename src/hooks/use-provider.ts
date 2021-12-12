@@ -6,6 +6,15 @@ import { useEthpp } from "./use-ethpp";
 
 type UseProvider =
   | {
+      status: "initializing";
+      account: null;
+      chainId: null;
+      provider: EthProvider | WalletConnectProvider | null;
+      key: ProviderKey;
+      connect: () => Promise<void>;
+      disconnect: () => Promise<void>;
+    }
+  | {
       status: "unavailable";
       account: null;
       chainId: null;
@@ -29,8 +38,13 @@ type UseProvider =
       provider: EthProvider | WalletConnectProvider;
     });
 export function useProvider(providerKey: ProviderKey): UseProvider {
-  const { providers, connectProvider, disconnectProvider, providerConnectors } =
-    useEthpp();
+  const {
+    providers,
+    connectProvider,
+    disconnectProvider,
+    providerConnectors,
+    globalStatus,
+  } = useEthpp();
 
   if (!(providerKey in providerConnectors)) {
     throw new Error("Connector not existing :(");
@@ -52,6 +66,18 @@ export function useProvider(providerKey: ProviderKey): UseProvider {
     if (!connector) return null;
     return connector.getProvider();
   }, [providerKey, providerConnectors]);
+
+  if (globalStatus === "initializing") {
+    return {
+      status: "initializing",
+      account: null,
+      chainId: null,
+      provider,
+      key: providerKey,
+      connect,
+      disconnect,
+    };
+  }
 
   if (!providerState) {
     if (!provider) {

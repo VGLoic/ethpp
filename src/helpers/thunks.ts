@@ -82,6 +82,13 @@ export async function connectWallet({
     );
   }
 
+  dispatch({
+    type: "connecting",
+    payload: {
+      providerKey,
+    },
+  });
+
   const { accounts, chainId } = await connector.connect();
 
   LocalStorageHelper.addKey(providerKey);
@@ -112,29 +119,28 @@ export async function synchronize({
     }
     providerKeys.push(rawProviderKey as ProviderKey);
   });
-  providerKeys.forEach(async (providerKey) => {
-    if (!(providerKey in providerConnectors)) {
-      LocalStorageHelper.removeKey(providerKey);
-      return;
-    }
-    const connector = providerConnectors[providerKey];
-    try {
-      const successfullConnection = await connector.synchronize();
-      if (!successfullConnection) {
+
+  await Promise.all(
+    providerKeys.map(async (providerKey) => {
+      const connector = providerConnectors[providerKey];
+      try {
+        const successfullConnection = await connector.synchronize();
+        if (!successfullConnection) {
+          LocalStorageHelper.removeKey(providerKey);
+          return;
+        }
+        dispatch({
+          type: "connected",
+          payload: {
+            accounts: successfullConnection.accounts,
+            chainId: successfullConnection.chainId,
+            providerKey,
+          },
+        });
+      } catch (err) {
         LocalStorageHelper.removeKey(providerKey);
-        return;
+        console.warn(`Unable to synchronize ${providerKey}. Got error: ${err}`);
       }
-      dispatch({
-        type: "connected",
-        payload: {
-          accounts: successfullConnection.accounts,
-          chainId: successfullConnection.chainId,
-          providerKey,
-        },
-      });
-    } catch (err) {
-      LocalStorageHelper.removeKey(providerKey);
-      console.warn(`Unable to synchronize ${providerKey}. Got error: ${err}`);
-    }
-  });
+    })
+  );
 }
