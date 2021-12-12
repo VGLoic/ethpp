@@ -33,11 +33,13 @@ export class WalletConnectConnector implements Connector {
         const walletConnectItem = JSON.parse(rawWalletConnectItem);
         if (walletConnectItem.connected) {
           const accounts = await this.provider.enable();
-          const chainId = this.provider.chainId;
+          const chainId = (await this.provider.request({
+            method: "eth_chainId",
+          })) as string;
 
           return {
             accounts,
-            chainId: this.formatChainId(chainId),
+            chainId,
             selectedProvider: "WalletConnect",
           };
         }
@@ -51,11 +53,13 @@ export class WalletConnectConnector implements Connector {
   async connect(): Promise<SuccessfullConnection> {
     try {
       const accounts = await this.provider.enable();
-      const chainId = this.provider.chainId;
+      const chainId = (await this.provider.request({
+        method: "eth_chainId",
+      })) as string;
 
       return {
         accounts,
-        chainId: this.formatChainId(chainId),
+        chainId,
         selectedProvider: "WalletConnect",
       };
     } catch (err) {
