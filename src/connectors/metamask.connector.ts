@@ -5,6 +5,7 @@ export class MetaMaskConnector implements Connector {
   id = "metamask_connector";
 
   getProvider() {
+    if (!window) return null;
     const metaMaskProvider = (window as any).ethereum as EthProvider;
     if (!metaMaskProvider || !metaMaskProvider.isMetaMask) {
       return null;

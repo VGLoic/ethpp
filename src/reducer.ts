@@ -3,6 +3,12 @@ import { LocalStorageHelper } from "./helpers";
 
 export type Action =
   | {
+      type: "connecting";
+      payload: {
+        providerKey: ProviderKey;
+      };
+    }
+  | {
       type: "connected";
       payload: {
         accounts: string[];
@@ -43,7 +49,13 @@ export type ConnectedState = {
   chainId: string;
   key: ProviderKey;
 };
-export type ProviderState = ConnectedState;
+export type ConnectingState = {
+  status: "connecting";
+  account: null;
+  chainId: null;
+  key: ProviderKey;
+};
+export type ProviderState = ConnectedState | ConnectingState;
 export type State = {
   selectedProvider: null | ProviderKey;
   connectedKeys: ProviderKey[];
@@ -58,6 +70,19 @@ export const initialState: State = {
 
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
+    case "connecting":
+      return {
+        ...state,
+        providers: {
+          ...state.providers,
+          [action.payload.providerKey]: {
+            status: "connecting",
+            account: null,
+            chainId: null,
+            key: action.payload.providerKey,
+          },
+        },
+      };
     case "connected":
       return {
         selectedProvider: action.payload.providerKey,
@@ -81,6 +106,7 @@ export function reducer(state: State, action: Action): State {
         console.warn("Unreachable chainChanged. Please file an issue.");
         return state;
       }
+      if (providerState_chainChanged.status === "connecting") return state;
       return {
         ...state,
         providers: {
@@ -113,6 +139,7 @@ export function reducer(state: State, action: Action): State {
           providers: providersState_accountChanged,
         };
       }
+      if (providerState_accountChanged.status === "connecting") return state;
       return {
         ...state,
         providers: {
